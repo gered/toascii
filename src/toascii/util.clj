@@ -2,6 +2,12 @@
   (:require [clojure.string :as str]
             [clojure.stacktrace :refer [print-stack-trace]]))
 
+(defn get-filename-without-ext [^String filename]
+  (let [idx (.lastIndexOf filename ".")]
+    (if-not (neg? idx)
+      (subs filename 0 idx)
+      filename)))
+
 (defn get-throwable-stack-trace [throwable]
   (if throwable
     (with-out-str

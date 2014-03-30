@@ -39,6 +39,7 @@ $(document).ready(function() {
 		var htmlOutputContainer = form.siblings('div.htmlOutputContainer');
 		var errorContainer = form.siblings('div.methodErrorContainer');
 		var methodCallDisplay = form.siblings('div.methodCallDisplay');
+		var methodCallLink = methodCallDisplay.find('a.url');
 
 		var apiEndpoint = form.data('api-endpoint');
 
@@ -50,7 +51,7 @@ $(document).ready(function() {
 		fieldset.attr('disabled', true);
 
 		var url = context + 'api' + apiEndpoint + '?' + jQuery.param(params);
-		methodCallDisplay.find('.url').text('GET ' + url);
+		methodCallLink.text('GET ' + url).attr('href', url);
 		methodCallDisplay.show();
 
 		$.get(url)

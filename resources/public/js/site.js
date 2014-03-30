@@ -20,7 +20,7 @@ $(document).ready(function() {
 		var form = $(this);
 
 		var params = {};
-		form.find('input, select, textarea').filter('[data-fieldname]').each(function() {
+		form.find('.form-control').filter('[data-fieldname]').each(function() {
 			var element = $(this);
 			var fieldName = element.data('fieldname');
 			var value = element.val();   // TODO: handle other types of elements (e.g. checkbox, radiobutton)

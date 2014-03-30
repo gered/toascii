@@ -7,6 +7,7 @@
             [clj-jtwig.core :as jtwig]
             [clj-jtwig.web.middleware :refer [wrap-servlet-context-path]]
             [toascii.route-utils :refer [find-routes]]
+            [toascii.models.flf :as flf]
             [toascii.util :refer [log-formatter]]))
 
 (defroutes app-routes
@@ -30,7 +31,9 @@
 
   (when (env :dev)
     (log :info "Dev environment. Template caching disabled.")
-    (jtwig/toggle-compiled-template-caching! false)))
+    (jtwig/toggle-compiled-template-caching! false))
+
+  (flf/load-all!))
 
 (defn destroy
   "destroy will be called when your application

@@ -11,52 +11,82 @@
   (:use hiccup.core))
 
 (def ascii-chars [\# \A \@ \% \$ \+ \= \* \: \, \. \space])
+(def num-ascii-chars (count ascii-chars))
 
-(defmacro get-properties [obj & properties]
-  (let [target (gensym)]
-    `(let [~target ~obj]
-       (vector ~@(for [property properties]
-                   `(~property ~target))))))
+(defn get-image-by-url
+  (^BufferedImage [^String url]
+   (try
+     (let [java-url (query-param-url->java-url url)]
+       (ImageIO/read java-url))
+     (catch Exception ex))))
+
+(defn get-image-by-file
+  (^BufferedImage [^File file]
+   (try
+     (ImageIO/read file)
+     (catch Exception ex))))
 
 (defn scale-image
   "takes a source image specified by the uri (a filename or a URL) and scales it proportionally
    using the new width, returning the newly scaled image."
-  [url new-width]
-  (let [^Image image (ImageIO/read url)
-        new-height   (* (/ new-width (.getWidth image))
-                        (.getHeight image))
-        scaled-image (BufferedImage. new-width new-height BufferedImage/TYPE_INT_RGB)
-        gfx2d        (doto (.createGraphics scaled-image)
-                       (.setRenderingHint RenderingHints/KEY_INTERPOLATION
-                                          RenderingHints/VALUE_INTERPOLATION_BILINEAR)
-                       (.drawImage image 0 0 new-width new-height nil)
-                       (.dispose))]
-    scaled-image))
+  (^BufferedImage [url new-width]
+   (let [^Image image (ImageIO/read url)
+         new-height    (* (/ new-width (.getWidth image))
+                          (.getHeight image))
+         scaled-image (BufferedImage. new-width new-height BufferedImage/TYPE_INT_RGB)
+         gfx2d        (doto (.createGraphics scaled-image)
+                        (.setRenderingHint RenderingHints/KEY_INTERPOLATION
+                                           RenderingHints/VALUE_INTERPOLATION_BILINEAR)
+                        (.drawImage image 0 0 new-width new-height nil)
+                        (.dispose))]
+     scaled-image)))
 
-(defn ascii [^BufferedImage img x y color?]
-  (let [[red green blue] (get-properties (Color. (.getRGB img x y))
-                                         .getRed .getGreen .getBlue)
-        peak    (apply max [red green blue])
-        idx     (if (zero? peak)
-                  (dec (count ascii-chars))
-                  (dec (int (+ 1/2 (* (count ascii-chars) (/ peak 255))))))
-        output  (nth ascii-chars (if (pos? idx) idx 0))	]
+(defn- get-css-color-attr [r g b]
+  (format "color: #%02x%02x%02x;" r g b))
+
+(defn- get-pixel [^BufferedImage image x y]
+  (let [argb (.getRGB image x y)]
+    [(bit-shift-right (bit-and 0xff000000 argb) 24)
+     (bit-shift-right (bit-and 0x00ff0000 argb) 16)
+     (bit-shift-right (bit-and 0x0000ff00 argb) 8)
+     (bit-and 0x000000ff argb)]))
+
+(defn get-ascii-pixel
+  ""
+  [^BufferedImage image x y color?]
+  (let [[a r g b]  (get-pixel image x y)
+        peak       (apply max [r g b])
+        char-index (if (zero? peak)
+                     (dec num-ascii-chars)
+                     (dec (int (+ 0.5 (* num-ascii-chars (/ peak 255))))))
+        pixel-char (nth ascii-chars (if (pos? char-index) char-index 0))]
     (if color?
-      (html [:span {:style (format "color: rgb(%s,%s,%s);" red green blue)} output])
+      [:span {:style (get-css-color-attr r g b)} pixel-char]
+      pixel-char)))
+
+(defn- pixels->ascii [^BufferedImage image color?]
+  (let [width       (.getWidth image)
+        ascii-image (for [y (range (.getHeight image))
+                          x (range (.getWidth image))]
+                      (get-ascii-pixel image x y color?))
+        output      (->> ascii-image
+                         (partition width)
+                         (map #(conj % (if color? [:br] \newline)))
+                         (apply concat))]
+    (if color?
+      (html
+        [:pre
+         {:style "font-size:5pt; letter-spacing:1px; line-height:4pt; font-weight:bold;"}
+         output])
       output)))
 
-(defn convert-image [url w color?]
-  (let [java-url         (query-param-url->java-url url)
-        ^Image raw-image (scale-image java-url w)
-        ascii-image      (->> (for [y (range (.getHeight raw-image))
-                                    x (range (.getWidth  raw-image))]
-                                (ascii raw-image x y color?))
-                              (partition w))
-        output           (->> ascii-image
-                              (interpose (if color? "<BR/>" \newline))
-                              flatten)]
-    (if color?
-      (html [:pre {:style "font-size:5pt; letter-spacing:1px;
-                           line-height:4pt; font-weight:bold;"}
-             output])
-      (println output))))
+(defn convert-image
+  ([^BufferedImage image color?]
+   (convert-image image nil color?))
+  ([^BufferedImage image scale-width color?]
+   (let [current-width (.getWidth image)
+         new-width     (or scale-width current-width)
+         final-image   (if-not (= new-width current-width)
+                         (scale-image image new-width)
+                         image)]
+     (pixels->ascii final-image color?))))

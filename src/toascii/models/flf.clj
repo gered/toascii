@@ -161,7 +161,7 @@
 
 (defn get-font-names []
   (->> @fonts
-       (vals)
+       (keys)
        (sort)))
 
 (defn load-all! []

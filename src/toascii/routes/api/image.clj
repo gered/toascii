@@ -4,7 +4,7 @@
             [liberator.core :refer [defresource]]
             [compojure.core :refer [ANY]]
             [toascii.route-utils :refer [register-routes]]
-            [toascii.models.image :refer [convert-image get-image-by-url]]
+            [toascii.models.image :refer [convert-image get-image-by-url wrap-pre-tag]]
             [toascii.util :refer [parse-int parse-boolean]]))
 
 (defn- color? [color]
@@ -25,11 +25,9 @@
   :malformed?
   (fn [_]
     (cond
-      (str/blank? url)
-      {:error "Missing image url"}
-
-      (and width (nil? (parse-int width)))
-      {:error "Invalid image width."}))
+      (str/blank? url)                     {:error "Missing image url"}
+      (and width
+           (nil? (parse-int width)))       {:error "Invalid image width."}))
   :exists?
   (fn [_]
     (if-let [image (get-image-by-url url)]
@@ -37,10 +35,14 @@
       [false {:error "Image could not be loaded."}]))
   :handle-ok
   (fn [ctx]
-    (convert-image
-      (:image ctx)
-      (parse-int width)
-      (color? color)))
+    (let [html? (= "text/html" (get-in ctx [:representation :media-type]))
+          output (convert-image
+              (:image ctx)
+              (parse-int width)
+              (color? color))]
+      (if html?
+        (wrap-pre-tag output)
+        output)))
   :handle-malformed
   (fn [ctx]
     (:error ctx))

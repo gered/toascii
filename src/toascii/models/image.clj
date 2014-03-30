@@ -6,7 +6,8 @@
            (javax.imageio ImageIO)
            (java.io File)
            (java.net URL URLEncoder URI))
-  (:require [cemerick.url :as url]
+  (:require [clojure.string :as str]
+            [cemerick.url :as url]
             [toascii.util :refer [query-param-url->java-url]])
   (:use hiccup.core))
 
@@ -51,11 +52,8 @@
                          (map #(conj % (if color? [:br] \newline)))
                          (apply concat))]
     (if color?
-      (html
-        [:pre
-         {:style "font-size:6pt; letter-spacing:1px; line-height:5pt; font-weight:bold;"}
-         output])
-      output)))
+      (html output)
+      (str/join output))))
 
 (defn get-image-by-url
   (^BufferedImage [^String url]
@@ -99,3 +97,6 @@
                          (scale-image image new-width)
                          image)]
      (pixels->ascii final-image color?))))
+
+(defn wrap-pre-tag [s]
+  (str "<pre style=\"font-size:6pt; letter-spacing:1px; line-height:5pt; font-weight:bold;\">" s "</pre>"))

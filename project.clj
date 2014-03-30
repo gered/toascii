@@ -12,7 +12,8 @@
    [clj-jtwig-java6 "0.3.2"]
    [environ "0.4.0"]
    [clj-metasearch "0.1.1"]
-   [clj-figlet "0.1.1"]]
+   [clj-figlet "0.1.1"]
+   [com.cemerick/url "0.1.1"]]
   :main         main
   :plugins      [[lein-ring "0.8.10"]
                  [lein-environ "0.4.0"]]

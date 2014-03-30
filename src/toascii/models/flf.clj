@@ -159,6 +159,11 @@
 (defn get-font [name]
   (get @fonts name))
 
+(defn get-font-names []
+  (->> @fonts
+       (vals)
+       (sort)))
+
 (defn load-all! []
   (->> flf-files
        (reduce

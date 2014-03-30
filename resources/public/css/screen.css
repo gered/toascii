@@ -1,5 +1,16 @@
 html, body {
 	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	height: 100%;
-	padding-top: 40px;
+}
+
+#logo {
+	padding-top: 50px;
+	padding-bottom: 50px;
+}
+
+.asciiart {
+	margin: 0px auto;
+	width: 340px;
+	font-family: Monaco, Menlo, Consolas, 'Courier New', monospace;
+	white-space: pre;
 }

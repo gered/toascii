@@ -156,6 +156,9 @@
 
 (defonce fonts (atom {}))
 
+(defn get-font [name]
+  (get @fonts name))
+
 (defn load-all! []
   (->> flf-files
        (reduce

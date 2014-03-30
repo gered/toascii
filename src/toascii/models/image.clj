@@ -44,6 +44,13 @@
 (defn- get-css-color-attr [r g b]
   (format "color: #%02x%02x%02x;" r g b))
 
+(defn- get-color-brightness [r g b]
+  (int
+    (Math/sqrt
+      (+ (* r r 0.241)
+         (* g g 0.691)
+         (* b b 0.068)))))
+
 (defn- get-pixel [^BufferedImage image x y]
   (let [argb (.getRGB image x y)]
     [(bit-shift-right (bit-and 0xff000000 argb) 24)
@@ -55,10 +62,10 @@
   ""
   [^BufferedImage image x y color?]
   (let [[a r g b]  (get-pixel image x y)
-        peak       (apply max [r g b])
+        peak       (get-color-brightness r g b)
         char-index (if (zero? peak)
                      (dec num-ascii-chars)
-                     (dec (int (+ 0.5 (* num-ascii-chars (/ peak 255))))))
+                     (dec (int (* num-ascii-chars (/ peak 255)))))
         pixel-char (nth ascii-chars (if (pos? char-index) char-index 0))]
     (if color?
       [:span {:style (get-css-color-attr r g b)} pixel-char]

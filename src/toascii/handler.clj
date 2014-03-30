@@ -8,7 +8,8 @@
             [clj-jtwig.web.middleware :refer [wrap-servlet-context-path]]
             [toascii.route-utils :refer [find-routes]]
             [toascii.models.flf :as flf]
-            [toascii.util :refer [log-formatter]]))
+            [toascii.util :refer [log-formatter]]
+            [toascii.middleware :refer [wrap-exceptions]]))
 
 (defroutes app-routes
   (route/resources "/")
@@ -16,11 +17,11 @@
 
 (defonce routes (find-routes "toascii.routes." app-routes))
 
-(defonce app (app-handler
-               routes
-               :middleware [wrap-servlet-context-path]
-               :access-rules []
-               :formats [:json-kw :edn]))
+(def app (app-handler
+           routes
+           :middleware [wrap-exceptions wrap-servlet-context-path]
+           :access-rules []
+           :formats [:json-kw :edn]))
 
 (defn init []
   (set-config! [:shared-appender-config :spit-filename] "toascii.log")

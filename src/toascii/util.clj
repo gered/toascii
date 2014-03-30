@@ -59,3 +59,20 @@
        (url/url)
        (encode-url-path-components)
        (URL.)))
+
+(defn parse-int [s]
+  (try
+    (Integer/parseInt s)
+    (catch Exception ex)))
+
+(defn parse-boolean [x]
+  (let [x (if (string? x)
+            (-> x (.toLowerCase) (.trim))
+            x)]
+    (condp = x
+      "false" false
+      false   false
+      "0"     false
+      0       false
+      nil     false
+      true)))

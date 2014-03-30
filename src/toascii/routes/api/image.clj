@@ -4,20 +4,32 @@
             [liberator.core :refer [defresource]]
             [compojure.core :refer [ANY]]
             [toascii.route-utils :refer [register-routes]]
-            [toascii.models.image :refer [convert-image get-image-by-url]]))
+            [toascii.models.image :refer [convert-image get-image-by-url]]
+            [toascii.util :refer [parse-int parse-boolean]]))
+
+(defn- color? [color]
+  (if (nil? color)
+    true
+    (parse-boolean color)))
 
 (defresource render-image [{:keys [url width color format] :as params}]
   :media-type-available?
   (fn [ctx]
-    (let [type (condp = format
-                 "html" "text/html"
-                 "text" "text/plain"
-                 "text/html")]
-      {:representation {:media-type type}}))
+    (if (color? color)
+      {:representation {:media-type "text/html"}}
+      (let [type (condp = format
+                   "html" "text/html"
+                   "text" "text/plain"
+                   "text/html")]
+        {:representation {:media-type type}})))
   :malformed?
   (fn [_]
     (cond
-      (str/blank? url) {:error "Missing image url"}))
+      (str/blank? url)
+      {:error "Missing image url"}
+
+      (and width (nil? (parse-int width)))
+      {:error "Invalid image width."}))
   :exists?
   (fn [_]
     (if-let [image (get-image-by-url url)]
@@ -25,10 +37,10 @@
       [false {:error "Image could not be loaded."}]))
   :handle-ok
   (fn [ctx]
-    (let [rendered (convert-image (:image ctx) true)]
-      (if (= "text/html" (get-in ctx [:representation :media-type]))
-        rendered
-        rendered)))
+    (convert-image
+      (:image ctx)
+      (parse-int width)
+      (color? color)))
   :handle-malformed
   (fn [ctx]
     (:error ctx))

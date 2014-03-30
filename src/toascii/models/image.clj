@@ -13,34 +13,6 @@
 (def ascii-chars [\# \A \@ \% \$ \+ \= \* \: \, \. \space])
 (def num-ascii-chars (count ascii-chars))
 
-(defn get-image-by-url
-  (^BufferedImage [^String url]
-   (try
-     (let [java-url (query-param-url->java-url url)]
-       (ImageIO/read java-url))
-     (catch Exception ex))))
-
-(defn get-image-by-file
-  (^BufferedImage [^File file]
-   (try
-     (ImageIO/read file)
-     (catch Exception ex))))
-
-(defn scale-image
-  "takes a source image specified by the uri (a filename or a URL) and scales it proportionally
-   using the new width, returning the newly scaled image."
-  (^BufferedImage [url new-width]
-   (let [^Image image (ImageIO/read url)
-         new-height    (* (/ new-width (.getWidth image))
-                          (.getHeight image))
-         scaled-image (BufferedImage. new-width new-height BufferedImage/TYPE_INT_RGB)
-         gfx2d        (doto (.createGraphics scaled-image)
-                        (.setRenderingHint RenderingHints/KEY_INTERPOLATION
-                                           RenderingHints/VALUE_INTERPOLATION_BILINEAR)
-                        (.drawImage image 0 0 new-width new-height nil)
-                        (.dispose))]
-     scaled-image)))
-
 (defn- get-css-color-attr [r g b]
   (format "color: #%02x%02x%02x;" r g b))
 
@@ -58,9 +30,7 @@
      (bit-shift-right (bit-and 0x0000ff00 argb) 8)
      (bit-and 0x000000ff argb)]))
 
-(defn get-ascii-pixel
-  ""
-  [^BufferedImage image x y color?]
+(defn- get-ascii-pixel [^BufferedImage image x y color?]
   (let [[a r g b]  (get-pixel image x y)
         peak       (get-color-brightness r g b)
         char-index (if (zero? peak)
@@ -87,12 +57,44 @@
          output])
       output)))
 
+(defn get-image-by-url
+  (^BufferedImage [^String url]
+   (try
+     (let [java-url (query-param-url->java-url url)]
+       (ImageIO/read java-url))
+     (catch Exception ex))))
+
+(defn get-image-by-file
+  "returns a BufferedImage loaded from the file specified, or null if an error occurs."
+  (^BufferedImage [^File file]
+   (try
+     (ImageIO/read file)
+     (catch Exception ex))))
+
+(defn scale-image
+  "takes a source image specified by the uri (a filename or a URL) and scales it proportionally
+   using the new width, returning the newly scaled image."
+  (^BufferedImage [^BufferedImage image new-width]
+   (let [new-height    (* (/ new-width (.getWidth image))
+                          (.getHeight image))
+         scaled-image (BufferedImage. new-width new-height BufferedImage/TYPE_INT_RGB)
+         gfx2d        (doto (.createGraphics scaled-image)
+                        (.setRenderingHint RenderingHints/KEY_INTERPOLATION
+                                           RenderingHints/VALUE_INTERPOLATION_BILINEAR)
+                        (.drawImage image 0 0 new-width new-height nil)
+                        (.dispose))]
+     scaled-image)))
+
 (defn convert-image
+  "converts the image to an ascii representation. a multiline string will be returned,
+   which will be formatted for html if color? is true, or plain text if false. if
+   scale-to-width is specified the resulting image will be scaled proportionally from
+   the source image."
   ([^BufferedImage image color?]
    (convert-image image nil color?))
-  ([^BufferedImage image scale-width color?]
+  ([^BufferedImage image scale-to-width color?]
    (let [current-width (.getWidth image)
-         new-width     (or scale-width current-width)
+         new-width     (or scale-to-width current-width)
          final-image   (if-not (= new-width current-width)
                          (scale-image image new-width)
                          image)]

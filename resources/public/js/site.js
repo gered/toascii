@@ -21,11 +21,18 @@ $(document).ready(function() {
 		var fieldset = form.find('fieldset');
 
 		var params = {};
-		form.find('.form-control').filter('[data-fieldname]').each(function() {
+		form.find('.form-control, input[type=checkbox]').filter('[data-fieldname]').each(function() {
 			var element = $(this);
 			var fieldName = element.data('fieldname');
-			var value = element.val();   // TODO: handle other types of elements (e.g. checkbox, radiobutton)
-			params[fieldName] = value;
+
+			var value;
+			if (element.prop('tagName') === 'INPUT' && element.attr('type') === 'checkbox')
+				value = element.is(':checked') ? element.val() : element.data('unchecked-value');
+			else
+				value = element.val();
+
+			if (value && value.length > 0)
+				params[fieldName] = value;
 		});
 
 		var textOutputContainer = form.siblings('pre.textOutputContainer');

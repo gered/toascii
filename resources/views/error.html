@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+	<h1 class="page-header">Server Error</h1>
+
+	<p>Sorry, an error has occurred!</p>
+
+	{% if stacktrace %}
+		<pre>{{ stacktrace|e }}</pre>
+	{% endif %}
+{% endblock %}

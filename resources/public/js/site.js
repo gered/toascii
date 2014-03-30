@@ -18,6 +18,7 @@ $(document).ready(function() {
 		e.preventDefault();
 
 		var form = $(this);
+		var fieldset = form.find('fieldset');
 
 		var params = {};
 		form.find('.form-control').filter('[data-fieldname]').each(function() {
@@ -38,6 +39,8 @@ $(document).ready(function() {
 		errorContainer.html('');
 		errorContainer.hide();
 
+		fieldset.attr('disabled', true);
+
 		var url = context + 'api' + apiEndpoint + '?' + jQuery.param(params);
 		$.get(url)
 			.done(
@@ -51,6 +54,8 @@ $(document).ready(function() {
 					textOutputContainer.text(data);
 					textOutputContainer.show();
 				}
+
+				fieldset.attr('disabled', null);
 			})
 			.fail(
 			function (response) {
@@ -62,6 +67,8 @@ $(document).ready(function() {
 					response.responseText
 				);
 				errorContainer.show();
+
+				fieldset.attr('disabled', null);
 			});
 	})
 

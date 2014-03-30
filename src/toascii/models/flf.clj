@@ -165,5 +165,3 @@
          {})
        (reset! fonts)
        (count)))
-
-(load-all!)

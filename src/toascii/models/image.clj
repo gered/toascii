@@ -1,11 +1,9 @@
 (ns toascii.models.image
   "Largely based on the Claskii library: https://github.com/LauJensen/Claskii"
-  (:import (java.awt Color RenderingHints Graphics2D Image)
+  (:import (java.awt RenderingHints Graphics2D Image)
            (java.awt.image BufferedImage)
-           (javax.swing ImageIcon)
            (javax.imageio ImageIO)
-           (java.io File)
-           (java.net URL URLEncoder URI))
+           (java.io File))
   (:require [clojure.string :as str]
             [cemerick.url :as url]
             [toascii.util :refer [query-param-url->java-url]])

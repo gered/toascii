@@ -7,27 +7,23 @@
             [toascii.models.image :refer [convert-image get-image-by-url wrap-pre-tag]]
             [toascii.util :refer [parse-int parse-boolean]]))
 
-(defn- color? [color]
-  (if (nil? color)
-    true
-    (parse-boolean color)))
-
 (defresource render-image [{:keys [url width color format] :as params}]
   :media-type-available?
   (fn [ctx]
-    (if (color? color)
-      {:representation {:media-type "text/html"}}
-      (let [type (condp = format
-                   "html" "text/html"
-                   "text" "text/plain"
-                   "text/html")]
-        {:representation {:media-type type}})))
+    (let [type (condp = format
+                 "html" "text/html"
+                 "text" "text/plain"
+                 "text/html")]
+      {:representation {:media-type type}}))
   :malformed?
-  (fn [_]
+  (fn [ctx]
     (cond
       (str/blank? url)                     {:error "Missing image url"}
       (and width
-           (nil? (parse-int width)))       {:error "Invalid image width."}))
+           (nil? (parse-int width)))       {:error "Invalid image width."}
+      (and (= "text" format)
+           (not (nil? color))
+           (parse-boolean color))          {:error "Cannot output colored plain text version of image."}))
   :exists?
   (fn [_]
     (if-let [image (get-image-by-url url)]
@@ -36,10 +32,12 @@
   :handle-ok
   (fn [ctx]
     (let [html? (= "text/html" (get-in ctx [:representation :media-type]))
+          color? (or (and html? (nil? color))
+                     (parse-boolean color))
           output (convert-image
               (:image ctx)
               (parse-int width)
-              (color? color))]
+              color?)]
       (if html?
         (wrap-pre-tag output)
         output)))

@@ -16,12 +16,14 @@
       {:representation {:media-type type}}))
   :malformed?
   (fn [_]
-    (str/blank? s))
+    (cond
+      (str/blank? s) {:error "Missing text to render"}))
   :exists?
   (fn [ctx]
     (let [font-name (or font "standard")]
       (if-let [flf (get-font font-name)]
-        {:flf flf})))
+        {:flf flf}
+        [false {:error "Font not found."}])))
   :handle-ok
   (fn [ctx]
     (let [rendered (figlet/render-to-string (:flf ctx) s)]
@@ -29,11 +31,11 @@
         (str "<pre>" rendered "</pre>")
         rendered)))
   :handle-malformed
-  (fn [_]
-    "Missing text to render.")
+  (fn [ctx]
+    (:error ctx))
   :handle-not-found
-  (fn [_]
-    "Font not found."))
+  (fn [ctx]
+    (:error ctx)))
 
 (register-routes api-text-routes
   (ANY "/api/text" {params :params} (render-text params)))

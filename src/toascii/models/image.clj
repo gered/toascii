@@ -83,7 +83,7 @@
     (if color?
       (html
         [:pre
-         {:style "font-size:5pt; letter-spacing:1px; line-height:4pt; font-weight:bold;"}
+         {:style "font-size:6pt; letter-spacing:1px; line-height:5pt; font-weight:bold;"}
          output])
       output)))
 

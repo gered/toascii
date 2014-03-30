@@ -14,3 +14,12 @@ html, body {
 	font-family: Monaco, Menlo, Consolas, 'Courier New', monospace;
 	white-space: pre;
 }
+
+.textOutputContainer {
+	overflow-x: scroll;
+}
+
+.htmlOutputContainer pre {
+	overflow-x: scroll;
+	word-wrap: normal;
+}

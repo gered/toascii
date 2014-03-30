@@ -58,5 +58,4 @@
   (->> url
        (url/url)
        (encode-url-path-components)
-       (str)
        (URL.)))

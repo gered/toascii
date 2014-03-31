@@ -13,7 +13,8 @@
    [environ "0.4.0"]
    [clj-metasearch "0.1.1"]
    [clj-figlet "0.1.1"]
-   [com.cemerick/url "0.1.1"]]
+   [com.cemerick/url "0.1.1"]
+   [criterium "0.4.3" :scope "test"]]
   :main         main
   :plugins      [[lein-ring "0.8.10"]
                  [lein-environ "0.4.0"]]

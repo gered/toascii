@@ -54,11 +54,12 @@
                        (url/map->query query))))
            (when anchor (str \# anchor))))))
 
-(defn query-param-url->java-url [^String url]
+(defn query-param-url->java-url
+  (^URL [^String url]
   (->> url
        (url/url)
        (encode-url-path-components)
-       (URL.)))
+       (URL.))))
 
 (defn parse-int [s]
   (try

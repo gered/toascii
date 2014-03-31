@@ -3,7 +3,8 @@
   (:import (java.awt RenderingHints Graphics2D Image)
            (java.awt.image BufferedImage Raster)
            (javax.imageio ImageIO)
-           (java.io File))
+           (java.io File)
+           (java.net URL))
   (:require [clojure.string :as str]
             [cemerick.url :as url]
             [toascii.util :refer [query-param-url->java-url]])

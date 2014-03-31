@@ -1,7 +1,7 @@
 (ns toascii.models.image
   "Largely based on the Claskii library: https://github.com/LauJensen/Claskii"
   (:import (java.awt RenderingHints Graphics2D Image)
-           (java.awt.image BufferedImage)
+           (java.awt.image BufferedImage Raster)
            (javax.imageio ImageIO)
            (java.io File))
   (:require [clojure.string :as str]
@@ -12,46 +12,43 @@
 (def ascii-chars [\# \A \@ \% \$ \+ \= \* \: \, \. \space])
 (def num-ascii-chars (count ascii-chars))
 
-(defn- get-css-color-attr [r g b]
-  (format "color: #%02x%02x%02x;" r g b))
-
-(defn- get-color-brightness [r g b]
-  (int
-    (Math/sqrt
-      (+ (* r r 0.241)
-         (* g g 0.691)
-         (* b b 0.068)))))
-
-(defn- get-pixel [^BufferedImage image x y]
-  (let [argb (.getRGB image x y)]
-    [(bit-shift-right (bit-and 0xff000000 argb) 24)
-     (bit-shift-right (bit-and 0x00ff0000 argb) 16)
-     (bit-shift-right (bit-and 0x0000ff00 argb) 8)
-     (bit-and 0x000000ff argb)]))
-
-(defn- get-ascii-pixel [^BufferedImage image x y color?]
-  (let [[a r g b]  (get-pixel image x y)
-        peak       (get-color-brightness r g b)
+(defn- add-pixel [argb ^StringBuilder sb color?]
+  (let [r          (bit-shift-right (bit-and 0x00ff0000 argb) 16)
+        g          (bit-shift-right (bit-and 0x0000ff00 argb) 8)
+        b          (bit-and 0x000000ff argb)
+        peak       (int
+                     (Math/sqrt
+                       (+ (* r r 0.241)
+                          (* g g 0.691)
+                          (* b b 0.068))))
         char-index (if (zero? peak)
                      (dec num-ascii-chars)
                      (dec (int (* num-ascii-chars (/ peak 255)))))
         pixel-char (nth ascii-chars (if (pos? char-index) char-index 0))]
     (if color?
-      [:span {:style (get-css-color-attr r g b)} pixel-char]
+      ; <span style="color: rgb(255, 255, 255);">X</span>
+      (doto sb
+        (.append "<span style=\"color: rgb(")
+        (.append r)
+        (.append ",")
+        (.append g)
+        (.append ",")
+        (.append b)
+        (.append ");\">")
+        (.append pixel-char)
+        (.append "</span>"))
       pixel-char)))
 
 (defn- pixels->ascii [^BufferedImage image color?]
-  (let [width       (.getWidth image)
-        ascii-image (for [y (range (.getHeight image))
-                          x (range (.getWidth image))]
-                      (get-ascii-pixel image x y color?))
-        output      (->> ascii-image
-                         (partition width)
-                         (map #(conj % (if color? [:br] \newline)))
-                         (apply concat))]
-    (if color?
-      (html output)
-      (str/join output))))
+  (let [width  (.getWidth image)
+        height (.getHeight image)
+        sb     (StringBuilder.)
+        pixels (.getDataElements (.getRaster image) 0 0 width height nil)]
+    (dotimes [y height]
+      (dotimes [x width]
+        (add-pixel (aget pixels (+ x (* y width))) sb color?))
+      (.append sb (if color? "<br>" \newline)))
+    (.toString sb)))
 
 (defn get-image-by-url
   (^BufferedImage [^String url]
@@ -98,3 +95,18 @@
 
 (defn wrap-pre-tag [s]
   (str "<pre style=\"font-size:6pt; letter-spacing:1px; line-height:5pt; font-weight:bold;\">" s "</pre>"))
+
+
+
+#_(require '[criterium.core :as c])
+
+#_(c/bench
+  (let [f (File. "./test/images/test.png")
+        image (get-image-by-file f)
+        ascii (convert-image image true)]
+    (count ascii)))
+
+#_(let [f (File. "./test/images/test.png")
+      image (get-image-by-file f)
+      ascii (convert-image image true)]
+  (count ascii))

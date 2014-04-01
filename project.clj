@@ -1,6 +1,6 @@
 (defproject toascii "0.1.0-SNAPSHOT"
   :description "Web site and REST api for http://toascii.net/"
-  :url "https://github.com/gered/toascii"
+  :url         "https://github.com/gered/toascii"
   :dependencies
   [[org.clojure/clojure "1.6.0"]
    [lib-noir "0.8.1"]
@@ -15,18 +15,20 @@
    [clj-figlet "0.1.1"]
    [com.cemerick/url "0.1.1"]
    [criterium "0.4.3" :scope "test"]]
-  :main         main
-  :plugins      [[lein-ring "0.8.10"]
-                 [lein-environ "0.4.0"]]
-  :ring         {:handler toascii.handler/app
-                 :init    toascii.handler/init
-                 :destroy toascii.handler/destroy}
-  :profiles     {:uberjar    {:aot :all}
-                 :production {:ring {:open-browser? false
-                                     :stacktraces?  false
-                                     :auto-reload?  false}}
-                 :repl       {:source-paths ["dev"]}
-                 :dev        {:env          {:dev true}
-                              :dependencies [[ring-mock "0.1.5"]
-                                             [ring/ring-devel "1.2.2"]]}}
-  :min-lein-version "2.0.0")
+  :source-paths      ["src/clojure"]
+  :java-source-paths ["src/java"]
+  :main              main
+  :plugins           [[lein-ring "0.8.10"]
+                      [lein-environ "0.4.0"]]
+  :ring              {:handler toascii.handler/app
+                      :init    toascii.handler/init
+                      :destroy toascii.handler/destroy}
+  :profiles          {:uberjar    {:aot :all}
+                      :production {:ring {:open-browser? false
+                                          :stacktraces?  false
+                                          :auto-reload?  false}}
+                      :repl       {:source-paths ["dev"]}
+                      :dev        {:env          {:dev true}
+                                   :dependencies [[ring-mock "0.1.5"]
+                                                  [ring/ring-devel "1.2.2"]]}}
+  :min-lein-version  "2.0.0")

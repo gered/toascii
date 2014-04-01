@@ -13,7 +13,7 @@
 (def ascii-chars [\# \A \@ \% \$ \+ \= \* \: \, \. \space])
 (def num-ascii-chars (count ascii-chars))
 
-(defn- add-pixel [argb ^StringBuilder sb color?]
+(defn- add-pixel [^Integer argb ^StringBuilder sb color?]
   (let [r          (bit-shift-right (bit-and 0x00ff0000 argb) 16)
         g          (bit-shift-right (bit-and 0x0000ff00 argb) 8)
         b          (bit-and 0x000000ff argb)
@@ -27,7 +27,6 @@
                      (dec (int (* num-ascii-chars (/ peak 255)))))
         pixel-char (nth ascii-chars (if (pos? char-index) char-index 0))]
     (if color?
-      ; <span style="color: rgb(255, 255, 255);">X</span>
       (doto sb
         (.append "<span style=\"color: rgb(")
         (.append r)
@@ -41,10 +40,10 @@
       pixel-char)))
 
 (defn- pixels->ascii [^BufferedImage image color?]
-  (let [width  (.getWidth image)
-        height (.getHeight image)
-        sb     (StringBuilder.)
-        pixels (.getDataElements (.getRaster image) 0 0 width height nil)]
+  (let [width        (.getWidth image)
+        height       (.getHeight image)
+        sb           (StringBuilder. (+ (* width height 47) (* height 4)))
+        ^ints pixels (.getRGB image 0 0 width height nil 0 width)]
     (dotimes [y height]
       (dotimes [x width]
         (add-pixel (aget pixels (+ x (* y width))) sb color?))
@@ -97,6 +96,8 @@
 (defn wrap-pre-tag [s]
   (str "<pre style=\"font-size:6pt; letter-spacing:1px; line-height:5pt; font-weight:bold;\">" s "</pre>"))
 
+
+#_(set! *warn-on-reflection* true)
 
 
 #_(require '[criterium.core :as c])

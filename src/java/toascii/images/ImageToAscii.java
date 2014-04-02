@@ -4,36 +4,37 @@ import java.awt.image.BufferedImage;
 
 public class ImageToAscii {
 	static final char[] asciiChars = {'#', 'A', '@', '%', '$', '+', '=', '*', ':', ',', '.', ' '};
+	static final int numAsciiChars = asciiChars.length - 1;
 	static final int spanLength = "<span style=\"color:rgb(255,255,255);\">X</span>".length();
 	static final int lineTerminatorLength = "<br>".length();
 
 	public static String convert(BufferedImage image, boolean useColor) {
-		int width = image.getWidth();
-		int height = image.getHeight();
+		final int width = image.getWidth();
+		final int height = image.getHeight();
 
-		int maxLength = (useColor ?
-		                 (width * height * spanLength) + (height * lineTerminatorLength) :
-		                 (width * height) + height);
+		final int maxLength = (useColor ?
+		                       (width * height * spanLength) + (height * lineTerminatorLength) :
+		                       (width * height) + height);
 
-		StringBuilder sb = new StringBuilder(maxLength);
+		final StringBuilder sb = new StringBuilder(maxLength);
 
-		int[] pixels = image.getRGB(0, 0, width, height, null, 0, width);
+		final int[] pixels = image.getRGB(0, 0, width, height, null, 0, width);
 		for (int y = 0; y < height; ++y) {
 			for (int x = 0; x < width; ++x) {
-				int argb = pixels[(y * width) + x];
-				int r = (0x00ff0000 & argb) >> 16;
-				int g = (0x0000ff00 & argb) >> 8;
-				int b = (0x000000ff & argb);
-				int brightness = (int)Math.sqrt((r * r * 0.241f) +
+				final int argb = pixels[(y * width) + x];
+				final int r = (0x00ff0000 & argb) >> 16;
+				final int g = (0x0000ff00 & argb) >> 8;
+				final int b = (0x000000ff & argb);
+				final double brightness = Math.sqrt((r * r * 0.241f) +
 				                                (g * g * 0.691f) +
 				                                (b * b * 0.068f));
 				int charIndex;
 				if (brightness == 0.0f)
-					charIndex = asciiChars.length - 1;
+					charIndex = numAsciiChars;
 				else
-					charIndex = (int)((brightness / 255.0f) * asciiChars.length) - 1;
+					charIndex = (int)((brightness / 255.0f) * numAsciiChars);
 
-				char pixelChar = asciiChars[charIndex > 0 ? charIndex : 0];
+				final char pixelChar = asciiChars[charIndex > 0 ? charIndex : 0];
 
 				if (useColor) {
 					sb.append("<span style=\"color:rgb(");

@@ -2,11 +2,14 @@
   (:import (java.awt.image BufferedImage)
            (javax.imageio.stream ImageInputStream))
   (:require [clojure.string :as str]
+            [clojure.java.io :as io]
             [clj-image2ascii.core :as i2a]
             [toascii.util :refer [query-param-url->java-url]])
   (:use hiccup.core))
 
-(def ascii-pre-css "font-size:6pt; letter-spacing:1px; line-height:5pt; font-weight:bold;")
+(def js-gif-animation (slurp (io/resource "gif-animation.js")))
+
+(def ascii-pre-css "font-size:6pt; letter-spacing:1px; line-height:5pt; font-weight:bold; display: none;")
 
 (defn get-image [^String url]
   (let [java-url (query-param-url->java-url url)]
@@ -37,4 +40,6 @@
           (fn [frame]
             (wrap-pre-tag (:image frame) (:delay frame)))
           x)
-        (str/join x)))
+        (str/join x)
+        (str "<div class=\"animated-gif-frames\">" x "</div>")
+        (str x "<script type=\"text/javascript\">" js-gif-animation "</script>")))

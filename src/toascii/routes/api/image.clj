@@ -1,5 +1,6 @@
 (ns toascii.routes.api.image
-  (:import (java.awt.image BufferedImage))
+  (:import (java.awt.image BufferedImage)
+           (javax.imageio IIOException))
   (:require [clojure.string :as str]
             [liberator.core :refer [defresource]]
             [compojure.core :refer [ANY]]
@@ -59,7 +60,10 @@
   (fn [ctx]
     (let [color? (or (nil? color)
                      (parse-boolean color))]
-      (gif->ascii (:image ctx) (parse-int width) color?)))
+      (try
+        (gif->ascii (:image ctx) (parse-int width) color?)
+        (catch IIOException ex
+          (throw (new Exception "Invalid GIF image."))))))
   :handle-malformed
   (fn [ctx]
     (:error ctx))

@@ -4,7 +4,7 @@
             [liberator.core :refer [defresource]]
             [compojure.core :refer [ANY]]
             [toascii.route-utils :refer [register-routes]]
-            [toascii.models.image :refer [convert-image get-image-by-url wrap-pre-tag]]
+            [toascii.models.image :refer [image->ascii get-image]]
             [toascii.util :refer [parse-int parse-boolean]]))
 
 (defresource render-image [{:keys [url width color format] :as params}]
@@ -26,21 +26,15 @@
            (parse-boolean color))          {:error "Cannot output colored plain text version of image."}))
   :exists?
   (fn [_]
-    (if-let [image (get-image-by-url url)]
+    (if-let [image (get-image url)]
       {:image image}
       [false {:error "Image could not be loaded."}]))
   :handle-ok
   (fn [ctx]
     (let [html? (= "text/html" (get-in ctx [:representation :media-type]))
           color? (or (and html? (nil? color))
-                     (parse-boolean color))
-          output (convert-image
-              (:image ctx)
-              (parse-int width)
-              color?)]
-      (if html?
-        (wrap-pre-tag output)
-        output)))
+                     (parse-boolean color))]
+      (image->ascii (:image ctx) (parse-int width) color? html?)))
   :handle-malformed
   (fn [ctx]
     (:error ctx))

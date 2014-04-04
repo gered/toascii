@@ -16,8 +16,6 @@
    [clj-image2ascii "0.1.0-SNAPSHOT"]
    [com.cemerick/url "0.1.1"]
    [criterium "0.4.3" :scope "test"]]
-  :source-paths      ["src/clojure"]
-  :java-source-paths ["src/java"]
   :main              main
   :plugins           [[lein-ring "0.8.10"]
                       [lein-environ "0.4.0"]]

@@ -4,7 +4,7 @@
             [liberator.core :refer [defresource]]
             [compojure.core :refer [ANY]]
             [toascii.route-utils :refer [register-routes]]
-            [toascii.models.image :refer [image->ascii get-image]]
+            [toascii.models.image :refer [image->ascii gif->ascii get-image get-image-stream]]
             [toascii.util :refer [parse-int parse-boolean]]))
 
 (defresource render-image [{:keys [url width color format] :as params}]
@@ -42,5 +42,31 @@
   (fn [ctx]
     (:error ctx)))
 
+(defresource render-animated-image [{:keys [url width color] :as params}]
+  :available-media-types ["text/html"]
+  :malformed?
+  (fn [ctx]
+    (cond
+      (str/blank? url)                     {:error "Missing image url"}
+      (and width
+           (nil? (parse-int width)))       {:error "Invalid image width."}))
+  :exists?
+  (fn [_]
+    (if-let [stream (get-image-stream url)]
+      {:image stream}
+      [false {:error "Image could not be loaded."}]))
+  :handle-ok
+  (fn [ctx]
+    (let [color? (or (nil? color)
+                     (parse-boolean color))]
+      (gif->ascii (:image ctx) (parse-int width) color?)))
+  :handle-malformed
+  (fn [ctx]
+    (:error ctx))
+  :handle-not-found
+  (fn [ctx]
+    (:error ctx)))
+
 (register-routes api-image-routes
-  (ANY "/api/image" {params :params} (render-image params)))
+  (ANY "/api/image" {params :params} (render-image params))
+  (ANY "/api/animated" {params :params} (render-animated-image params)))

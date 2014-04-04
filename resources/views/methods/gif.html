@@ -1,0 +1,44 @@
+<form class="form-horizontal api-form" role="form" id="gifForm" data-api-endpoint="/animated">
+	<fieldset>
+
+		<div class="form-group">
+			<label for="gifUrl" class="col-sm-2 control-label">GIF URL</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" id="gifUrl" placeholder="http://url/to/image" data-fieldname="url" />
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label for="gifMonochrome" class="col-sm-2 control-label">Color</label>
+			<div class="col-sm-3">
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" id="gifMonochrome" data-fieldname="color" value="false" />
+						Black &amp; White
+					</label>
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label for="gifWidth" class="col-sm-2 control-label">Scale to Width</label>
+			<div class="col-sm-3">
+				<input type="text" class="form-control" id="gifWidth" placeholder="Width (in pixels) to scale to" data-fieldname="width" />
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="col-sm-offset-2 col-sm-10">
+				<button type="submit" class="btn btn-primary">To ASCII</button>
+			</div>
+		</div>
+
+	</fieldset>
+</form>
+
+<div class="methodCallDisplay well well-sm" style="display: none;">
+	<strong>API request:</strong> &nbsp; <a class="url text-muted"></a>
+</div>
+<pre class="textOutputContainer" style="display: none;"></pre>
+<div class="htmlOutputContainer" style="display: none;"></div>
+<div class="methodErrorContainer alert alert-danger" style="display: none;"></div>

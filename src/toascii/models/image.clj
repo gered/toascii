@@ -43,7 +43,7 @@
         (:frames x)
         (map
           (fn [frame]
-            (wrap-pre-tag (:image frame) :delay (:delay frame)))
+            (wrap-pre-tag (:image frame) :delay (:delay frame) :hidden? true))
           x)
         (str/join x)
         (str "<div class=\"animated-gif-frames\">" x "</div>")

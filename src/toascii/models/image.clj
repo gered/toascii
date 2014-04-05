@@ -9,7 +9,7 @@
 
 (def js-gif-animation (slurp (io/resource "gif-animation.js")))
 
-(def ascii-pre-css "font-size:6pt; letter-spacing:1px; line-height:5pt; font-weight:bold; display: none;")
+(def ascii-pre-css "font-size:6pt; letter-spacing:1px; line-height:5pt; font-weight:bold;")
 
 (defn get-image [^String url]
   (let [java-url (query-param-url->java-url url)]
@@ -19,11 +19,16 @@
   (let [java-url (query-param-url->java-url url)]
     (i2a/get-image-stream-by-url java-url)))
 
-(defn wrap-pre-tag
-  ([s]
-   (str "<pre style=\"" ascii-pre-css "\">" s "</pre>"))
-  ([s delay]
-   (str "<pre style=\"" ascii-pre-css "\" data-delay=\"" delay "\">" s "</pre>")))
+(defn wrap-pre-tag [s & {:keys [hidden? delay]}]
+  (str
+    "<pre style=\""
+    ascii-pre-css
+    (if hidden?
+      " display: none;")
+    "\""
+    (if delay
+      (str " data-delay=\"" delay "\""))
+    ">" s "</pre>"))
 
 (defn image->ascii [^BufferedImage image scale-to-width color? html?]
   (let [converted (i2a/convert-image image scale-to-width color?)
@@ -38,7 +43,7 @@
         (:frames x)
         (map
           (fn [frame]
-            (wrap-pre-tag (:image frame) (:delay frame)))
+            (wrap-pre-tag (:image frame) :delay (:delay frame)))
           x)
         (str/join x)
         (str "<div class=\"animated-gif-frames\">" x "</div>")

@@ -15,20 +15,24 @@
   (route/resources "/")
   (route/not-found "Not Found"))
 
-(defonce routes (find-routes "toascii.routes." app-routes))
+(defonce ring-app (atom nil))
 
-(def app (app-handler
-           routes
-           :middleware [wrap-exceptions wrap-servlet-context-path]
-           :access-rules []
-           :formats [:json-kw :edn]))
+(defn handle-app [request]
+  (@ring-app request))
 
 (defn init []
   (set-config! [:shared-appender-config :spit-filename] "toascii.log")
   (set-config! [:appenders :spit :enabled?] true)
   (set-config! [:fmt-output-fn] log-formatter)
 
-  (log :info "toascii started successfully")
+  (log :info "Starting up ...")
+
+  (reset! ring-app
+          (app-handler
+            (find-routes "toascii.routes." app-routes)
+            :middleware [wrap-exceptions wrap-servlet-context-path]
+            :access-rules []
+            :formats [:json-kw :edn]))
 
   (when (env :dev)
     (log :info "Dev environment. Template caching disabled.")
@@ -36,8 +40,5 @@
 
   (flf/load-all!))
 
-(defn destroy
-  "destroy will be called when your application
-   shuts down, put any clean up code here"
-  []
-  (log :info "toascii is shutting down..."))
+(defn destroy []
+  (log :info "Shutting down ..."))

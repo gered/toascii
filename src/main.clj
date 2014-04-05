@@ -2,13 +2,13 @@
   (:require [ring.middleware.file :refer [wrap-file]]
             [ring.middleware.file-info :refer [wrap-file-info]]
             [ring.server.standalone :refer [serve]]
-            [toascii.handler :refer [app init destroy]])
+            [toascii.handler :refer [handle-app init destroy]])
   (:gen-class))
 
 (defonce server (atom nil))
 
 (defn get-handler []
-  (-> #'app
+  (-> #'handle-app
       (wrap-file "resources")
       (wrap-file-info)))
 

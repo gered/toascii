@@ -19,7 +19,7 @@
   :main              main
   :plugins           [[lein-ring "0.8.10"]
                       [lein-environ "0.4.0"]]
-  :ring              {:handler toascii.handler/app
+  :ring              {:handler toascii.handler/handle-app
                       :init    toascii.handler/init
                       :destroy toascii.handler/destroy}
   :profiles          {:uberjar    {:aot :all}

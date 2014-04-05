@@ -13,7 +13,7 @@
    [environ "0.4.0"]
    [clj-metasearch "0.1.1"]
    [clj-figlet "0.1.1"]
-   [clj-image2ascii "0.1.0-SNAPSHOT"]
+   [clj-image2ascii "0.2"]
    [com.cemerick/url "0.1.1"]
    [criterium "0.4.3" :scope "test"]]
   :main              main

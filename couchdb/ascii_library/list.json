@@ -11,10 +11,6 @@
 		},
 		"byDate": {
 			"map": "function(doc) {\n  emit(doc.name, doc.date)\n}"
-		},
-		"uniqueNames": {
-			"map": "function(doc) {\n  emit(doc.name, null)\n}",
-			"reduce": "function(keys, values) {\n    return null;\n}"
 		}
 	}
 }

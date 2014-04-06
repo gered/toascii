@@ -4,6 +4,10 @@
 	"views": {
 		"hashes": {
 			"map": "function(doc) {\n  emit([doc.name, doc.hash], doc._id)\n}"
+		},
+		"names": {
+			"map": "function(doc) {\n  emit(doc.name, null)\n}",
+			"reduce": "function(keys, values) {\n    return null;\n}"
 		}
 	}
 }

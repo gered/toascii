@@ -76,5 +76,5 @@
   ;       to the search term and use it as the end key, effectively meaning "find all matches with keys
   ;       between 'prefix' and 'prefix\u9999'" which works because keys will be sorted lexicographically
   ;       by couchdb
-  (->> (couch/get-view-with-db (db-library) "list" "uniqueNames" {:startkey query :endkey (str query "\u9999") :group true})
+  (->> (couch/get-view-with-db (db-library) "search" "names" {:startkey query :endkey (str query "\u9999") :group true})
        (map :key)))

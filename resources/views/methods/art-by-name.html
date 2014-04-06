@@ -1,0 +1,43 @@
+<form class="form-horizontal api-form" role="form" id="artByNameForm" data-api-endpoint="/art">
+	<fieldset>
+
+		<div class="form-group">
+			<label for="artByNameName" class="col-sm-2 control-label">Name</label>
+			<div class="col-sm-3">
+				<input type="text" class="form-control" id="artByNameName" placeholder="Enter name of art to get" data-uri-path-order="0" />
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label for="artByNameIndex" class="col-sm-2 control-label">Index</label>
+			<div class="col-sm-3">
+				<input type="text" class="form-control" id="artByNameIndex" placeholder="(Optional) index of the art" data-uri-path-order="1" />
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label for="artByNameFormat" class="col-sm-2 control-label">Format</label>
+
+			<div class="col-sm-3">
+				<select class="form-control" id="artByNameFormat" data-fieldname="format">
+					<option>html</option>
+					<option>text</option>
+				</select>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="col-sm-offset-2 col-sm-10">
+				<button type="submit" class="btn btn-primary">Find</button>
+			</div>
+		</div>
+
+	</fieldset>
+</form>
+
+<div class="methodCallDisplay well well-sm" style="display: none;">
+	<strong>API request:</strong> &nbsp; <a class="url text-muted"></a>
+</div>
+<pre class="textOutputContainer" style="display: none;"></pre>
+<div class="htmlOutputContainer" style="display: none;"></div>
+<div class="methodErrorContainer alert alert-danger" style="display: none;"></div>

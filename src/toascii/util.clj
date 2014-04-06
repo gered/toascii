@@ -1,11 +1,17 @@
 (ns toascii.util
   (:import (java.net URL)
-           (java.io Writer))
+           (java.io Writer)
+           (java.text SimpleDateFormat)
+           (java.util Date))
   (:require [clojure.string :as str]
             [clojure.java.io :as io]
             [clojure.stacktrace :refer [print-stack-trace]]
             [ring.util.io :refer [piped-input-stream]]
             [cemerick.url :as url]))
+
+(defn now []
+  (-> (new SimpleDateFormat "yyyy-MM-dd'T'HH:mm:ss.sssZ")
+      (.format (new Date))))
 
 (defn get-filename-without-ext [^String filename]
   (let [idx (.lastIndexOf filename ".")]

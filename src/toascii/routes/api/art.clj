@@ -15,8 +15,7 @@
     (art/search q))
   :handle-malformed
   (fn [ctx]
-    (:error ctx))
-  )
+    (:error ctx)))
 
 (defresource get-random-art [{:keys [name format]}]
   :media-type-available?

@@ -3,9 +3,8 @@
            (javax.imageio.stream ImageInputStream)
            (java.io Writer))
   (:require [clojure.java.io :as io]
-            [ring.util.io :refer [piped-input-stream]]
             [clj-image2ascii.core :as i2a]
-            [toascii.util :refer [query-param-url->java-url]]))
+            [toascii.util :refer [query-param-url->java-url stream-response]]))
 
 (def js-gif-animation (slurp (io/resource "gif-animation.js")))
 
@@ -26,21 +25,17 @@
       (str "<pre style=\"" ascii-pre-css "\">" ascii "</pre>")
       ascii)))
 
-(defn- write-out [^Writer w s]
-  (.write w (str s)))
-
 (defn gif->ascii [^ImageInputStream image-stream scale-to-width color?]
-  (piped-input-stream
-    (fn [output-stream]
-      (with-open [^Writer w (io/writer output-stream :append true)]
-        (write-out w "<div class=\"animated-gif-frames\">")
-        (i2a/stream-animated-gif-frames!
-          image-stream scale-to-width color?
-          (fn [{:keys [image delay]}]
-            (write-out w (str "<pre style=\"" ascii-pre-css " display: none;\" data-delay=\"" delay "\">"))
-            (write-out w image)
-            (write-out w "</pre>")))
-        (write-out w "</div>")
-        (write-out w "<script type=\"text/javascript\">")
-        (write-out w js-gif-animation)
-        (write-out w "</script>")))))
+  (stream-response
+    (fn [^Writer w]
+      (.write w "<div class=\"animated-gif-frames\">")
+      (i2a/stream-animated-gif-frames!
+        image-stream scale-to-width color?
+        (fn [{:keys [^String image delay]}]
+          (.write w (str "<pre style=\"" ascii-pre-css " display: none;\" data-delay=\"" delay "\">"))
+          (.write w image)
+          (.write w "</pre>")))
+      (.write w "</div>")
+      (.write w "<script type=\"text/javascript\">")
+      (.write w js-gif-animation)
+      (.write w "</script>"))))

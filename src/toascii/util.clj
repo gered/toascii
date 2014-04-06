@@ -1,7 +1,10 @@
 (ns toascii.util
-  (:import (java.net URL))
+  (:import (java.net URL)
+           (java.io Writer))
   (:require [clojure.string :as str]
+            [clojure.java.io :as io]
             [clojure.stacktrace :refer [print-stack-trace]]
+            [ring.util.io :refer [piped-input-stream]]
             [cemerick.url :as url]))
 
 (defn get-filename-without-ext [^String filename]
@@ -77,3 +80,9 @@
       0       false
       nil     false
       true)))
+
+(defn stream-response [f]
+  (piped-input-stream
+    (fn [output-stream]
+      (with-open [^Writer w (io/writer output-stream)]
+        (f w)))))

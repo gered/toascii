@@ -43,7 +43,7 @@
   (fn [ctx]
     (:error ctx)))
 
-(defresource render-animated-image [{:keys [url width color] :as params}]
+(defresource render-animated-gif [{:keys [url width color] :as params}]
   :available-media-types ["text/html"]
   :malformed?
   (fn [ctx]
@@ -75,4 +75,4 @@
 
 (register-routes api-image-routes
   (ANY "/api/image" {params :params} (render-image params))
-  (ANY "/api/animated" {params :params} (render-animated-image params)))
+  (ANY "/api/animated-gif" {params :params} (render-animated-gif params)))

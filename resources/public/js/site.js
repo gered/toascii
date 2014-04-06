@@ -13,27 +13,65 @@ function isJsonResponse(xhr) {
 	return contentType.indexOf('application/json') !== -1;
 }
 
+function getValueOf(element) {
+	if (element.prop('tagName') === 'INPUT' && element.attr('type') === 'checkbox')
+		return element.is(':checked') ? element.val() : element.data('unchecked-value');
+	else
+		return element.val();
+}
+
+function getMethodParams(form) {
+	var params = {};
+	form.find('.form-control, input[type=checkbox]').filter('[data-fieldname]').each(function() {
+		var element = $(this);
+		var fieldName = element.data('fieldname');
+		var value = getValueOf(element);
+
+		if (value && value.length > 0)
+			params[fieldName] = value;
+	});
+	return params;
+}
+
+function getAdditionalUrl(form) {
+	var urlParts = [];
+	form.find('.form-control, input[type=checkbox]').filter('[data-uri-path-order]').each(function() {
+		var element = $(this);
+		var order = parseInt(element.data('uri-path-order'));
+		var value = getValueOf(element);
+
+		if (value && value.length > 0)
+			urlParts.push({order: order, value: value});
+	});
+
+	urlParts.sort(function(a, b) {
+		if (a.order < b.order)
+			return -1;
+		else if (a.order > b.order)
+			return 1;
+		else
+			return 0;
+	})
+
+	var urlPartStrings = [];
+	urlParts.forEach(function(value) {
+		urlPartStrings.push(value.value);
+	});
+
+	if (urlPartStrings.length > 0)
+		return '/' + urlPartStrings.join('/');
+	else
+		return '';
+}
+
 $(document).ready(function() {
 	$('form.api-form').submit(function(e) {
 		e.preventDefault();
 
 		var form = $(this);
 		var fieldset = form.find('fieldset');
-
-		var params = {};
-		form.find('.form-control, input[type=checkbox]').filter('[data-fieldname]').each(function() {
-			var element = $(this);
-			var fieldName = element.data('fieldname');
-
-			var value;
-			if (element.prop('tagName') === 'INPUT' && element.attr('type') === 'checkbox')
-				value = element.is(':checked') ? element.val() : element.data('unchecked-value');
-			else
-				value = element.val();
-
-			if (value && value.length > 0)
-				params[fieldName] = value;
-		});
+		var params = getMethodParams(form)
+		var additionalUrl = getAdditionalUrl(form);
 
 		var textOutputContainer = form.siblings('pre.textOutputContainer');
 		var htmlOutputContainer = form.siblings('div.htmlOutputContainer');
@@ -41,7 +79,7 @@ $(document).ready(function() {
 		var methodCallDisplay = form.siblings('div.methodCallDisplay');
 		var methodCallLink = methodCallDisplay.find('a.url');
 
-		var apiEndpoint = form.data('api-endpoint');
+		var apiEndpoint = form.data('api-endpoint') + additionalUrl;
 
 		textOutputContainer.text('');
 		htmlOutputContainer.html('');

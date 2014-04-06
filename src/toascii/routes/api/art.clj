@@ -2,7 +2,8 @@
   (:require [liberator.core :refer [defresource]]
             [compojure.core :refer [ANY]]
             [toascii.route-utils :refer [register-routes]]
-            [toascii.models.art :as art]))
+            [toascii.models.art :as art]
+            [toascii.util :refer [parse-index]]))
 
 (defresource art-search [q]
   :available-media-types ["application/json"]
@@ -46,6 +47,39 @@
   (fn [ctx]
     (:error ctx)))
 
+(defresource get-art [{:keys [name index format]}]
+  :media-type-available?
+  (fn [ctx]
+    (let [type (condp = format
+                 "html" "text/html"
+                 "text" "text/plain"
+                 "text/plain")]
+      {:representation {:media-type type}}))
+  :malformed?
+  (fn [_]
+    (cond
+      (not (art/valid-name? name)) {:error "Invalid name."}
+      (not (parse-index index))    {:error "Invalid index."}))
+  :exists?
+  (fn [_]
+    (try
+      (if-let [ascii (art/get-index name index)]
+        {:ascii ascii}
+        [false {:error "No art found under that name."}])
+      (catch IndexOutOfBoundsException ex
+        [false {:error "There aren't that many under that name."}])))
+  :handle-ok
+  (fn [ctx]
+    (if (= "text/html" (get-in ctx [:representation :media-type]))
+      (str "<pre>" (:ascii ctx) "</pre>")
+      (:ascii ctx)))
+  :handle-malformed
+  (fn [ctx]
+    (:error ctx))
+  :handle-not-found
+  (fn [ctx]
+    (:error ctx)))
+
 (defresource get-art-count-by [{:keys [name]}]
   :available-media-types ["application/json"]
   :malformed?
@@ -69,5 +103,6 @@
 
 (register-routes api-art-routes
   (ANY "/api/art/:name/count" {params :params} (get-art-count-by params))
+  (ANY "/api/art/:name/:index" {params :params} (get-art params))
   (ANY "/api/art/:name" {params :params} (get-random-art params))
   (ANY "/api/art" {{q :q} :params} (art-search q)))

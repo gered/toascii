@@ -46,6 +46,28 @@
   (fn [ctx]
     (:error ctx)))
 
+(defresource get-art-count-by [{:keys [name]}]
+  :available-media-types ["application/json"]
+  :malformed?
+  (fn [_]
+    (if-not (art/valid-name? name)
+      {:error "Invalid name."}))
+  :exists?
+  (fn [_]
+    (if-let [num (art/get-count name)]
+      {:count num}
+      [false {:error "No art found under that name."}]))
+  :handle-ok
+  (fn [ctx]
+    (str (:count ctx)))
+  :handle-malformed
+  (fn [ctx]
+    (:error ctx))
+  :handle-not-found
+  (fn [ctx]
+    (:error ctx)))
+
 (register-routes api-art-routes
+  (ANY "/api/art/:name/count" {params :params} (get-art-count-by params))
   (ANY "/api/art/:name" {params :params} (get-random-art params))
   (ANY "/api/art" {{q :q} :params} (art-search q)))

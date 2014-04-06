@@ -42,3 +42,39 @@
          :format  "ascii"
          :hash    (sha256 ascii)
          :content ascii}))))
+
+(defn get-ascii-art
+  ([doc-id]
+   (->> (couch/get-document-with-db (db-library) doc-id)
+        :content))
+  ([name index]
+   (if-let [doc-id (as-> (couch/get-view-with-db (db-library) "list" "byDate" {:key name}) x
+                         (sort-by :date x)
+                         (nth x index nil)
+                         (:id x))]
+     (get-ascii-art doc-id)
+     (throw (new IndexOutOfBoundsException)))))
+
+(defn get-random-ascii-art [name]
+  (->> (couch/get-view-with-db (db-library) "list" "ids" {:key name})
+       (rand-nth)
+       :value
+       (get-ascii-art)))
+
+(defn get-art-count []
+  (->> (couch/get-view-with-db (db-library) "list" "count")
+       (first)
+       :value))
+
+(defn get-art-count-by [name]
+  (->> (couch/get-view-with-db (db-library) "list" "count" {:key name :group true})
+       (first)
+       :value))
+
+(defn find-art-names [query]
+  ; HACK: to mimic a "starts with prefix" type of search with couchdb, we append unicode character \u9999
+  ;       to the search term and use it as the end key, effectively meaning "find all matches with keys
+  ;       between 'prefix' and 'prefix\u9999'" which works because keys will be sorted lexicographically
+  ;       by couchdb
+  (->> (couch/get-view-with-db (db-library) "list" "uniqueNames" {:startkey query :endkey (str query "\u9999") :group true})
+       (map :key)))

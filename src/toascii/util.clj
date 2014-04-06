@@ -76,6 +76,10 @@
     (Integer/parseInt s)
     (catch Exception ex)))
 
+(defn parse-index [s]
+  (if-let [i (parse-int s)]
+    (if (>= i 0) i)))
+
 (defn parse-boolean [x]
   (let [x (if (string? x)
             (-> x (.toLowerCase) (.trim))

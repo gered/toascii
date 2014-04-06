@@ -2,6 +2,7 @@
   (:import (java.net URL)
            (java.io Writer)
            (java.text SimpleDateFormat)
+           (java.security MessageDigest)
            (java.util Date))
   (:require [clojure.string :as str]
             [clojure.java.io :as io]
@@ -92,3 +93,32 @@
     (fn [output-stream]
       (with-open [^Writer w (io/writer output-stream)]
         (f w)))))
+
+(defn convert-line-endings [s]
+  (str/replace s "\r" ""))
+
+(defn blank-line? [s]
+  (-> s str/trim str/blank?))
+
+(defn remove-leading-and-trailing-blank-lines [s]
+  (let [lines (str/split s #"\n")
+        num-leading-blank-lines (->> lines (take-while blank-line?) count)
+        num-trailing-blank-lines (->> lines reverse (take-while blank-line?) count)]
+    (as-> lines x
+          (drop num-leading-blank-lines x)
+          (take (- (count x) num-trailing-blank-lines) x)
+          (str/join "\n" x))))
+
+; shamelessly copied from https://gist.github.com/kisom/1698245
+(defn hexdigest
+  "returns the hex digest of a string"
+  [^String input hash-algo]
+  (if (string? input)
+    (let [hash (MessageDigest/getInstance hash-algo)]
+      (. hash update (.getBytes input))
+      (let [digest (.digest hash)]
+        (apply str (map #(format "%02x" (bit-and % 0xff)) digest))))
+    (throw (new Exception "input argument must be of type String"))))
+
+(defn sha256 [s]
+  (hexdigest s "SHA-256"))

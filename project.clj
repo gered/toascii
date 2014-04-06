@@ -24,11 +24,13 @@
                       :init    toascii.handler/init
                       :destroy toascii.handler/destroy}
   :profiles          {:uberjar    {:aot :all}
-                      :production {:ring {:open-browser? false
-                                          :stacktraces?  false
-                                          :auto-reload?  false}}
+                      :production {                :ring {:open-browser? false
+                                                          :stacktraces?  false
+                                                          :auto-reload?  false}
+                                   :resource-paths ["env-resources/prod"]}
                       :repl       {:source-paths ["dev"]}
-                      :dev        {:env          {:dev true}
-                                   :dependencies [[ring-mock "0.1.5"]
-                                                  [ring/ring-devel "1.2.2"]]}}
+                      :dev        {:env            {:dev true}
+                                   :dependencies   [[ring-mock "0.1.5"]
+                                                    [ring/ring-devel "1.2.2"]]
+                                   :resource-paths ["env-resources/dev"]}}
   :min-lein-version  "2.0.0")

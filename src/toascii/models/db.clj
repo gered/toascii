@@ -56,10 +56,12 @@
      (throw (new IndexOutOfBoundsException)))))
 
 (defn get-random-ascii-art [name]
-  (->> (couch/get-view-with-db (db-library) "list" "ids" {:key name})
-       (rand-nth)
-       :value
-       (get-ascii-art)))
+  (let [results (couch/get-view-with-db (db-library) "list" "ids" {:key name})]
+    (if (seq results)
+      (->> results
+           (rand-nth)
+           :value
+           (get-ascii-art)))))
 
 (defn get-art-count []
   (->> (couch/get-view-with-db (db-library) "list" "count")

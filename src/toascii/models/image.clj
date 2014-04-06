@@ -6,7 +6,7 @@
             [clj-image2ascii.core :as i2a]
             [toascii.util :refer [query-param-url->java-url stream-response]]))
 
-(def js-gif-animation (slurp (io/resource "gif-animation.js")))
+(def ^String js-gif-animation (slurp (io/resource "gif-animation.js")))
 
 (def ascii-pre-css "font-size:6pt; letter-spacing:1px; line-height:5pt; font-weight:bold;")
 

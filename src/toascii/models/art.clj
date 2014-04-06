@@ -9,7 +9,7 @@
 
 (defn valid-name? [name]
   (if-not (nil? name)
-    (re-matches #"[A-Za-z0-9\-]+" name)))
+    (re-matches #"[a-z0-9\-]+" name)))
 
 (defn search [query]
   )
@@ -28,3 +28,9 @@
     (throw (new Exception "Invalid name")))
   (let [prepped-ascii (prep-ascii-art s)]
     (db/add-ascii-art name prepped-ascii ip)))
+
+
+(add
+  "heLllo"
+  "  _              _   _         \n | |__     ___  | | | |   ___  \n | '_ \\   / _ \\ | | | |  / _ \\ \n | | | | |  __/ | | | | | (_) |\n |_| |_|  \\___| |_| |_|  \\___/ \n                              "
+  "127.0.0.1")

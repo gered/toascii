@@ -8,10 +8,15 @@
   :available-media-types ["application/json"]
   :malformed?
   (fn [_]
-    (not (art/valid-name? q)))
+    (if-not (art/valid-name? q)
+      {:error "Invalid name."}))
   :handle-ok
   (fn [_]
-    (art/search q)))
+    (art/search q))
+  :handle-malformed
+  (fn [ctx]
+    (:error ctx))
+  )
 
 (register-routes api-art-routes
   (ANY "/api/art" {{q :q} :params} (art-search q)))

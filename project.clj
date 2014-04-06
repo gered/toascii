@@ -15,6 +15,7 @@
    [clj-figlet "0.1.1"]
    [clj-image2ascii "0.2"]
    [com.cemerick/url "0.1.1"]
+   [com.ashafa/clutch "0.5.0-RC1"]         ; install https://github.com/jalpedersen/clutch locally with 'lein install'
    [criterium "0.4.3" :scope "test"]]
   :main              main
   :plugins           [[lein-ring "0.8.10"]

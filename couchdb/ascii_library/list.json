@@ -1,0 +1,20 @@
+{
+	"_id": "_design/list",
+	"language": "javascript",
+	"views": {
+		"count": {
+			"map": "function(doc) {\n  emit(doc.name, 1)\n}",
+			"reduce": "_count"
+		},
+		"ids": {
+			"map": "function(doc) {\n  emit(doc.name, doc._id)\n}"
+		},
+		"byDate": {
+			"map": "function(doc) {\n  emit(doc.name, doc.date)\n}"
+		},
+		"uniqueNames": {
+			"map": "function(doc) {\n  emit(doc.name, null)\n}",
+			"reduce": "function(keys, values) {\n    return null;\n}"
+		}
+	}
+}

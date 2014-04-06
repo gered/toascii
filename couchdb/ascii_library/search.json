@@ -1,0 +1,9 @@
+{
+	"_id": "_design/search",
+	"language": "javascript",
+	"views": {
+		"hashes": {
+			"map": "function(doc) {\n  emit([doc.name, doc.hash], doc._id)\n}"
+		}
+	}
+}

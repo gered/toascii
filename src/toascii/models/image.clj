@@ -1,7 +1,9 @@
 (ns toascii.models.image
   (:import (java.awt.image BufferedImage)
            (javax.imageio.stream ImageInputStream)
-           (java.io Writer))
+           (javax.imageio ImageIO ImageReader)
+           (java.io Writer)
+           (java.util Iterator))
   (:require [clojure.java.io :as io]
             [clj-image2ascii.core :as i2a]
             [toascii.util :refer [query-param-url->java-url stream-response]]))
@@ -39,3 +41,13 @@
       (.write w "<script type=\"text/javascript\">")
       (.write w js-gif-animation)
       (.write w "</script>"))))
+
+(defn gif? [^ImageInputStream image-stream]
+  (let [^Iterator readers (ImageIO/getImageReaders image-stream)]
+    (->> (loop [formats []]
+           (if (.hasNext readers)
+             (recur (conj formats (.next readers)))
+             formats))
+         (map (fn [^ImageReader r]
+                (.getFormatName r)))
+         (some #(= "gif" %)))))

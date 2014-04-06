@@ -5,7 +5,7 @@
             [liberator.core :refer [defresource]]
             [compojure.core :refer [ANY]]
             [toascii.route-utils :refer [register-routes]]
-            [toascii.models.image :refer [image->ascii gif->ascii get-image get-image-stream]]
+            [toascii.models.image :refer [image->ascii gif->ascii get-image get-image-stream gif?]]
             [toascii.util :refer [parse-int parse-boolean]]))
 
 (defresource render-image [{:keys [url width color format] :as params}]
@@ -54,7 +54,9 @@
   :exists?
   (fn [_]
     (if-let [stream (get-image-stream url)]
-      {:image stream}
+      (if-not (gif? stream)
+        (throw (new Exception "Invalid GIF image."))
+        {:image stream})
       [false {:error "Image could not be loaded."}]))
   :handle-ok
   (fn [ctx]

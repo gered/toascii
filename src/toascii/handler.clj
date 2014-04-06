@@ -9,6 +9,7 @@
             [toascii.route-utils :refer [find-routes]]
             [toascii.models.flf :as flf]
             [toascii.util :refer [log-formatter]]
+            [toascii.config :refer [load-config!]]
             [toascii.middleware :refer [wrap-exceptions]]))
 
 (defroutes app-routes
@@ -26,6 +27,8 @@
   (set-config! [:fmt-output-fn] log-formatter)
 
   (log :info "Starting up ...")
+
+  (load-config!)
 
   (reset! ring-app
           (app-handler

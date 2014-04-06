@@ -1,5 +1,6 @@
 (ns toascii.handler
-  (:require [compojure.core :refer [defroutes]]
+  (:require [clojure.string :as str]
+            [compojure.core :refer [defroutes]]
             [compojure.route :as route]
             [noir.util.middleware :refer [app-handler]]
             [taoensso.timbre :refer [log set-config!]]
@@ -7,6 +8,7 @@
             [clj-jtwig.core :as jtwig]
             [clj-jtwig.web.middleware :refer [wrap-servlet-context-path]]
             [toascii.route-utils :refer [find-routes]]
+            [toascii.models.db :as db]
             [toascii.models.flf :as flf]
             [toascii.util :refer [log-formatter]]
             [toascii.config :refer [load-config!]]
@@ -29,6 +31,11 @@
   (log :info "Starting up ...")
 
   (load-config!)
+
+  (log :info "Checking DB status ...")
+  (if-let [missing-dbs (db/check-status)]
+    (log :error (str "Databases missing or not available: " (str/join "\n" missing-dbs)))
+    (log :info "DB status check passed."))
 
   (reset! ring-app
           (app-handler

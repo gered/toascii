@@ -4,7 +4,13 @@
 		<div class="form-group">
 			<label for="artByNameName" class="col-sm-2 control-label">Name</label>
 			<div class="col-sm-3">
-				<input type="text" class="form-control" id="artByNameName" placeholder="Enter name of art to get" data-uri-path-order="0" />
+				<input type="text"
+				       class="form-control"
+				       id="artByNameName"
+				       placeholder="Enter name of art to get"
+				       data-provide="typeahead"
+				       data-uri-path-order="0"
+				       data-typeahead-url="{{ path('/api/art') }}" />
 			</div>
 		</div>
 

@@ -65,6 +65,17 @@ function getAdditionalUrl(form) {
 }
 
 $(document).ready(function() {
+	$('input[data-typeahead-url]').each(function() {
+		var element = $(this);
+		var typeaheadUrl = element.data('typeahead-url');
+
+		element.typeahead({source: function(query, process) {
+			return $.get(typeaheadUrl, { q: query }, function (data) {
+				return process(data);
+			});
+		}});
+	});
+
 	$('form.api-form').submit(function(e) {
 		e.preventDefault();
 
